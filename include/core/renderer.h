@@ -20,6 +20,6 @@ void renderer_flush(void);
 
 void renderer_texture(Texture *texture, vec2_t *pos, vec2_t *size, vec2_t *src_pos, vec2_t *src_size, vec4_t *color);
 
-void renderer_model(const Model *model, const mat4_t *transform, const mat4_t *projection, const mat4_t *camera_transform, const Shader *shader);
+void renderer_model(const Model *model, const mat4_t *transform, const mat4_t *projection, const mat4_t *camera_transform, const vec3_t *camera_position, const Shader *shader);
 
 #endif // _RENDERER_H_

@@ -45,6 +45,7 @@ static void camera_update(float delta)
 
 	vec3_t right;
 	vec3_cross(&forward, &up, &right);
+	vec3_normalize(&right, &right);
 
 	// camera motion
 
@@ -136,6 +137,7 @@ int app_init(App *app, const AppConfig *config)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);	
+	glfwWindowHint(GLFW_SAMPLES, 4);
 
 	// create window
 
@@ -185,6 +187,14 @@ int app_init(App *app, const AppConfig *config)
 	glEnable(GL_DEPTH_TEST);
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	// culling
+
+	glEnable(GL_CULL_FACE);
+
+	// antialiasing
+
+	glEnable(GL_MULTISAMPLE);
+
 	// Application properties
 
 	app->window = window;
@@ -196,7 +206,7 @@ int app_init(App *app, const AppConfig *config)
 
 	// testing
 
-	test_model = model_load("models/sponza", "models/sponza/scene.gltf");
+	test_model = model_load("models/tank", "models/tank/scene.gltf");
 	model_dump_debug("model.txt", test_model);
 
 	shader = shader_load("shaders/model.vert", "shaders/model.frag");
@@ -219,12 +229,24 @@ static void app_update(App *app, float delta)
 {
 	static float time;
 
-	time += delta;
+	time += delta * 0.1f;
 
 	camera_update(delta);
 
-	vec3_t v = {0.01f, 0.01f, 0.01f};
-	mat4_scaling(&v, &model_transform);
+	vec3_t v = {5.0f, 5.0f, 5.0f};
+	mat4_t scale;
+	mat4_scaling(&v, &scale);
+
+	mat4_t rotation_x;
+	mat4_rotation_x(RADIANS(-90), &rotation_x);
+
+	mat4_t rotation_y;
+	mat4_rotation_y(time, &rotation_y);
+
+	mat4_t t1;
+	mat4_mult(&rotation_y, &rotation_x, &t1);
+
+	mat4_mult(&t1, &scale, &model_transform);
 }
 
 static void app_fixed_update(App *app, float delta)
@@ -247,7 +269,7 @@ static void app_render(App *app)
 
 	// render
 
-	renderer_model(test_model, &model_transform, &camera.projection, &camera.transform, shader);
+	renderer_model(test_model, &model_transform, &camera.projection, &camera.transform, &camera.position, shader);
 
 	// swap the window buffers
 

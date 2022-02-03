@@ -228,20 +228,21 @@ void renderer_texture(Texture *texture, vec2_t *pos, vec2_t *size, vec2_t *src_p
 	r.quads_to_render++;
 }
 
-void renderer_model(const Model *model, const mat4_t *transform, const mat4_t *projection, const mat4_t *camera_transform, const Shader *shader)
+void renderer_model(const Model *model, const mat4_t *transform, const mat4_t *projection, const mat4_t *camera_transform, const vec3_t *camera_position, const Shader *shader)
 {
 	shader_bind(shader);
 	shader_uniform_mat4(shader, "u_projection", projection);
 	shader_uniform_mat4(shader, "u_model", transform);
 	shader_uniform_mat4(shader, "u_view", camera_transform);
+	shader_uniform_v3(shader, "u_camera_position", camera_position);
 
-	// calculate normal matrix
+	// // calculate normal matrix
 
-	mat4_t normal_matrix, inverse;
-	mat4_inverse(transform, &inverse);
-	mat4_transpose(&inverse, &normal_matrix);
+	// mat4_t normal_matrix, inverse;
+	// mat4_inverse(transform, &inverse);
+	// mat4_transpose(&inverse, &normal_matrix);
 
-	shader_uniform_mat4(shader, "u_normal", &normal_matrix);
+	// shader_uniform_mat4(shader, "u_normal", &normal_matrix);
 
 	// render each mesh of the model
 
@@ -251,7 +252,11 @@ void renderer_model(const Model *model, const mat4_t *transform, const mat4_t *p
 		const material_t *material = &mesh->material;
 
 		shader_uniform_1i(shader, "u_texture_diffuse", 0);
+		shader_uniform_1i(shader, "u_texture_normal", 1);
+		shader_uniform_1i(shader, "u_texture_specular", 2);
 		texture_use(material->texture_diffuse, 0);
+		texture_use(material->texture_normal, 1);
+		texture_use(material->texture_specular, 2);
 
 		glBindVertexArray(mesh->vao);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);

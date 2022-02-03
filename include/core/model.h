@@ -8,6 +8,8 @@
 typedef struct material_t
 {
     Texture *texture_diffuse;
+    Texture *texture_normal;
+    Texture *texture_specular;
 } material_t;
 
 typedef struct Mesh

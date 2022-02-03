@@ -12,6 +12,8 @@ typedef struct Vertex
     vec3_t position;
     vec3_t normal;
     vec2_t texture_uv;
+    vec3_t tangent;
+    vec3_t bitangent;
 } Vertex;
 
 static void generate_mesh(const Vertex *vertex_data, int vertices_count, const unsigned int *index_data, int indices_count, const material_t *material, Mesh *output_mesh)
@@ -39,6 +41,10 @@ static void generate_mesh(const Vertex *vertex_data, int vertices_count, const u
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)offsetof(Vertex, normal));
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)offsetof(Vertex, texture_uv));
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)offsetof(Vertex, tangent));
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *)offsetof(Vertex, bitangent));
 
     // index buffer object
 
@@ -86,7 +92,7 @@ static Texture *get_material_texture(Model *model, const struct aiMaterial *ai_m
 
 Model *model_load(const char *dir, const char *path)
 {
-    const struct aiScene *ai_scene = aiImportFile(path, aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph);
+    const struct aiScene *ai_scene = aiImportFile(path, aiProcess_GenNormals | aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_OptimizeMeshes | aiProcess_OptimizeGraph);
 
     if (!ai_scene)
     {
@@ -139,6 +145,18 @@ Model *model_load(const char *dir, const char *path)
                 v->texture_uv.x = ai_mesh->mTextureCoords[0][j].x;
                 v->texture_uv.y = ai_mesh->mTextureCoords[0][j].y;
             }
+
+            // tangent
+
+            v->tangent.x = ai_mesh->mTangents[j].x;
+            v->tangent.y = ai_mesh->mTangents[j].y;
+            v->tangent.z = ai_mesh->mTangents[j].z;
+
+            // bitangent
+
+            v->bitangent.x = ai_mesh->mBitangents[j].x;
+            v->bitangent.y = ai_mesh->mBitangents[j].y;
+            v->bitangent.z = ai_mesh->mBitangents[j].z;
         }
 
         // get index data
@@ -165,6 +183,9 @@ Model *model_load(const char *dir, const char *path)
             const struct aiMaterial *ai_material = ai_scene->mMaterials[ai_mesh->mMaterialIndex];
 
             material.texture_diffuse = get_material_texture(model, ai_material, aiTextureType_DIFFUSE);
+            material.texture_normal = get_material_texture(model, ai_material, aiTextureType_NORMALS);
+            material.texture_specular = get_material_texture(model, ai_material, aiTextureType_UNKNOWN);
+
             // aiGetMaterialColor(ai_material, AI_MATKEY_COLOR_DIFFUSE, &material.color_diffuse);
         }
 
