@@ -18,11 +18,11 @@ Framebuffer *framebuffer_create(int width, int height)
 
     // create an empty texture with the size (width * height)
 
-    fb->tex = texture_create(width, height);
+    fb->texture = texture_create(width, height);
 
     // attach the texture to the framebuffer
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb->tex->id, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb->texture->id, 0);
 
     // unbind the framebuffer
 
@@ -35,7 +35,7 @@ Framebuffer *framebuffer_create(int width, int height)
 
 void framebuffer_destroy(Framebuffer *fb)
 {
-    texture_destroy(fb->tex);
+    texture_destroy(fb->texture);
     glDeleteFramebuffers(1, &fb->id);
     free(fb);
 }

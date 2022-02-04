@@ -7,7 +7,7 @@ typedef struct Framebuffer
 {
     unsigned int id;
     int width, height;
-    Texture *tex;
+    Texture *texture;
 } Framebuffer;
 
 Framebuffer *framebuffer_create(int width, int height);
